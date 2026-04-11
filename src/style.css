@@ -1,0 +1,9 @@
+html,
+#app {
+  background-color: #000;
+}
+
+#canvas-wrapper {
+  width: 800px;
+  height: 600px;
+}
