@@ -21,7 +21,7 @@ const bottom = ref(-size + offsetY)
 const { scene: model } = await useGLTF(
   // 'https://raw.githubusercontent.com/Tresjs/assets/main/models/gltf/aku-aku/AkuAku.gltf',
   // 'public/test_monkey.glb',
-  'public/test_shark_captain.glb',
+  './test_shark_captain.glb',
   {
     draco: true,
   },
