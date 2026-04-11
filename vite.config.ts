@@ -23,4 +23,5 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['vue', 'three'],
   },
+  base: "/test_vue/",
 })
