@@ -13,10 +13,43 @@ onUnmounted(() => {
   console.log('destroy')
 })
 
+// アニメーション管理番号
+enum Anim {
+  Stand = 0,
+  Walk = 1,
+}
+
 // サメ船長のモデル
 const model = shallowRef<THREE.Object3D | null>(null)
 const gltf = await useGLTF('./test_shark_captain.glb', { draco: true })
 model.value = gltf.scene
+const actions: Record<string, THREE.AnimationAction> = {}
+
+// ログ表示系処理
+const logTimeScale = () => {
+  if (!mixer) return
+  console.log(`timeScale: ${mixer.timeScale.toFixed(2)}`)
+}
+
+const logAnimationName = (num: number) => {
+  if (!gltf) return
+  console.log(`animations name: ${gltf.animations[num].name}`)
+}
+
+
+// アニメーション切り替え
+function playAction(name: string) {
+  if (!mixer) return
+
+  // すべてのアクションをフェードアウト
+  Object.values(actions).forEach(a => a.fadeOut(0.2))
+
+  // 指定アクションをフェードイン
+  const action = actions[name]
+  if (action) {
+    action.reset().fadeIn(0.2).play()
+  }
+}
 
 // アニメーションミキサー設定
 let mixer: THREE.AnimationMixer | null = null
@@ -26,19 +59,49 @@ onMounted(() => {
     return
   }
 
-  mixer = new THREE.AnimationMixer(gltf.scene)
-  const action = mixer.clipAction(gltf.animations[1])
-  action.play()
+  // 初期アニメ設定
+  var currentAnimNum = Anim.Stand
 
-  // キー入力で速度変更
+  //アニメーションを再生するための AnimationMixer を作成
+  mixer = new THREE.AnimationMixer(gltf.scene)
+  const action = mixer.clipAction(gltf.animations[currentAnimNum])
+  action.play()
+  logAnimationName(currentAnimNum)
+  console.log(`animations name: ${gltf.animations[currentAnimNum].name}`)
+
+  // GLB 内のすべてのアニメーションを AnimationAction に変換し、
+  // 名前でアクセスできるように登録する処理
+  gltf.animations.forEach((clip) => {
+    actions[clip.name] = mixer!.clipAction(clip)
+  })
+
+  // キー入力系処理
   window.addEventListener('keydown', (e) => {
     if (!mixer) return
 
-    if (e.key === 'ArrowUp') {
-      mixer.timeScale += 0.1
-    }
-    if (e.key === 'ArrowDown') {
-      mixer.timeScale = Math.max(0, mixer.timeScale - 0.1)
+    switch (e.key) {
+      case "ArrowUp":
+        mixer.timeScale += 0.1
+        logTimeScale()
+        break
+      case "ArrowDown":
+        mixer.timeScale = Math.max(0, mixer.timeScale - 0.1)
+        logTimeScale()
+        break
+      case "w":
+        if (currentAnimNum != Anim.Walk) {
+          playAction("Walk")
+          currentAnimNum = Anim.Walk
+          console.log(`animations name: Walk`)
+        }
+        break
+      case "s":
+        if (currentAnimNum != Anim.Stand) {
+          playAction("Stand")
+          currentAnimNum = Anim.Stand
+          console.log(`animations name: Stand`)
+        }
+        break
     }
   })
 })
@@ -84,6 +147,7 @@ const bottom = ref(-size)
   <primitive
    :object="model"
    :position="[0, -1.5, 0]"
+   @loaded="onLoaded"
   />
 
   <!-- 軸表示オブジェクト -->
