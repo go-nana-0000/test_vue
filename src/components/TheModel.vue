@@ -147,7 +147,6 @@ const bottom = ref(-size)
   <primitive
    :object="model"
    :position="[0, -1.5, 0]"
-   @loaded="onLoaded"
   />
 
   <!-- 軸表示オブジェクト -->
