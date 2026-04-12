@@ -13,5 +13,5 @@ npm run dev
 
 ## フルビルド
 ```
-npm build
+npm run build
 ```
