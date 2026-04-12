@@ -9,8 +9,7 @@ import TheModel from './components/TheModel.vue'
       :window-size="false"
       :resize="false"
       clear-color="#d2cbcb"
-
-      style="width: 600px; height: 600px;">
+      style="width: 100%; height: 100vh;">
       <Suspense>
         <TheModel />
       </Suspense>

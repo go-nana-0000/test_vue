@@ -119,6 +119,14 @@ const left = ref(-size * aspect)
 const right = ref(size * aspect)
 const top = ref(size)
 const bottom = ref(-size)
+
+// カメラのズーム設定
+const baseZoom = 150; // PCのときのzoom
+const baseWidth = 600; // PCの描画幅
+const factor = 0.7; // 影響度
+const scale = 1 + (window.innerWidth / baseWidth - 1) * factor;
+const cameraZoom = baseZoom * scale;
+
 </script>
 <!-- スクリプト設定ここまで -->
 
@@ -126,7 +134,7 @@ const bottom = ref(-size)
 <template>
   <!-- 平行カメラの設定 -->
   <TresOrthographicCamera
-    :zoom="200"
+    :zoom="cameraZoom"
     :left="left"
     :right="right"
     :top="top"
