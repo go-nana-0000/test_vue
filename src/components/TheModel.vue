@@ -1,37 +1,63 @@
 
-<!-- スクリプト設定 -->
+<!-- スクリプト設定ここから -->
 <script setup lang="ts">
 
-import type { TresObject } from '@tresjs/core'
-import { useGLTF, OrbitControls, useAnimations } from '@tresjs/cientos'
-import { ref, watch, onMounted } from 'vue'
+// 各種インポート設定
+import { ref, watch, onMounted, onUnmounted, shallowRef} from 'vue'
+import * as THREE from 'three'
+import { useGLTF, OrbitControls} from '@tresjs/cientos'
+import { useRenderLoop } from '@tresjs/core'
+
+// 描画前のエラー処理
+onUnmounted(() => {
+  console.log('destroy')
+})
 
 // サメ船長のモデル
-const { scene: model, animations } = await useGLTF('./test_shark_captain.glb',{draco: true,})
+const model = shallowRef<THREE.Object3D | null>(null)
+const gltf = await useGLTF('./test_shark_captain.glb', { draco: true })
+model.value = gltf.scene
 
-// const { scene } = await useGLTF('/models/character.glb')
-const { actions } = useAnimations(animations, model)
+// アニメーションミキサー設定
+let mixer: THREE.AnimationMixer | null = null
+onMounted(() => {
+  if (!gltf.scene) {
+    console.error('GLTF scene is undefined')
+    return
+  }
 
-// カメラ設定の定数定義----------------------
+  mixer = new THREE.AnimationMixer(gltf.scene)
+  const action = mixer.clipAction(gltf.animations[1])
+  action.play()
+
+  // キー入力で速度変更
+  window.addEventListener('keydown', (e) => {
+    if (!mixer) return
+
+    if (e.key === 'ArrowUp') {
+      mixer.timeScale += 0.1
+    }
+    if (e.key === 'ArrowDown') {
+      mixer.timeScale = Math.max(0, mixer.timeScale - 0.1)
+    }
+  })
+})
+
+// ループ設定
+const { onLoop } = useRenderLoop()
+onLoop(({ delta }) => {
+  if (mixer) mixer.update(delta)
+})
+
+// 平行カメラ設定
 const aspect = window.innerWidth / window.innerHeight
 const size = 5
 const left = ref(-size * aspect)
 const right = ref(size * aspect)
 const top = ref(size)
 const bottom = ref(-size)
-
-onMounted(() => {
-  // "Walk" という名前のアニメーションを再生
-  actions['Walk']?.play()
-  // actions['Walk'].timeScale = 0.5
-})
-
-const sharkCaptainRef = ref(null)
-watch(sharkCaptainRef, (model) => {
-  // eslint-disable-next-line no-console
-  console.log('sharkCaptainRef', model)
-})
 </script>
+<!-- スクリプト設定ここまで -->
 
 <!-- テンプレート設定 -->
 <template>
