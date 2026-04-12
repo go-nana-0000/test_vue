@@ -148,8 +148,15 @@ const cameraZoom = baseZoom * scale;
   <OrbitControls />
 
   <!-- ライト設定 -->
-  <TresAmbientLight :intensity="2" />
-  <TresDirectionalLight :position="[2, 2, 2]" />
+  <TresAmbientLight :intensity="1.5" />
+  <TresDirectionalLight :position="[2, 2, 2]" :intensity="1.5" />
+  <TresHemisphereLight
+    skyColor="#ffffff"
+    groundColor="#444444"
+    :intensity="0.8"
+  />
+
+
 
   <!-- モデル設定 -->
   <primitive

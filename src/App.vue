@@ -8,7 +8,7 @@ import TheModel from './components/TheModel.vue'
     <TresCanvas
       :window-size="false"
       :resize="false"
-      clear-color="#d2cbcb"
+      clear-color="#a9a9a9"
       style="width: 100%; height: 100vh;">
       <Suspense>
         <TheModel />
