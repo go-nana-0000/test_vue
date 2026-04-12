@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { TresCanvas } from '@tresjs/core'
-
-// import TheExperience from './components/TheExperience.vue'
 import TheModel from './components/TheModel.vue'
 </script>
 
