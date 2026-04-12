@@ -21,7 +21,7 @@ enum Anim {
 
 // サメ船長のモデル
 const model = shallowRef<THREE.Object3D | null>(null)
-const gltf = await useGLTF('./test_shark_captain.glb', { draco: true })
+const gltf = await useGLTF('./shark_captain.glb', { draco: true })
 model.value = gltf.scene
 const actions: Record<string, THREE.AnimationAction> = {}
 
