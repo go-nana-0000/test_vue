@@ -11,6 +11,7 @@ import TheModel from './components/TheModel.vue'
     <TresCanvas
       :window-size="false"
       :resize="false"
+      clear-color="#d2cbcb"
 
       style="width: 800px; height: 800px;">
       <Suspense>

@@ -1,41 +1,39 @@
+
+<!-- スクリプト設定 -->
 <script setup lang="ts">
+
 import type { TresObject } from '@tresjs/core'
-import { useGLTF } from '@tresjs/cientos'
-import { ref, watch } from 'vue'
-import { OrbitControls } from '@tresjs/cientos'
+import { useGLTF, OrbitControls, useAnimations } from '@tresjs/cientos'
+import { ref, watch, onMounted } from 'vue'
 
+// サメ船長のモデル
+const { scene: model, animations } = await useGLTF('./test_shark_captain.glb',{draco: true,})
 
+// const { scene } = await useGLTF('/models/character.glb')
+const { actions } = useAnimations(animations, model)
 
+// カメラ設定の定数定義----------------------
 const aspect = window.innerWidth / window.innerHeight
 const size = 5
+const left = ref(-size * aspect)
+const right = ref(size * aspect)
+const top = ref(size)
+const bottom = ref(-size)
 
-const offsetX = 200000
-const offsetY = -1000
-
-const left = ref(-size * aspect + offsetX)
-const right = ref(size * aspect + offsetX)
-const top = ref(size + offsetY)
-const bottom = ref(-size + offsetY)
-
-// クラッシュのアクアクのモデル
-const { scene: model } = await useGLTF(
-  // 'https://raw.githubusercontent.com/Tresjs/assets/main/models/gltf/aku-aku/AkuAku.gltf',
-  // 'public/test_monkey.glb',
-  './test_shark_captain.glb',
-  {
-    draco: true,
-  },
-)
-
-const akuAkuRef = ref(null)
-
-watch(akuAkuRef, (model) => {
-  // eslint-disable-next-line no-console
-  console.log('akuAkuRef', model)
+onMounted(() => {
+  // "Walk" という名前のアニメーションを再生
+  actions['Walk']?.play()
+  // actions['Walk'].timeScale = 0.5
 })
 
+const sharkCaptainRef = ref(null)
+watch(sharkCaptainRef, (model) => {
+  // eslint-disable-next-line no-console
+  console.log('sharkCaptainRef', model)
+})
 </script>
 
+<!-- テンプレート設定 -->
 <template>
   <!-- 平行カメラの設定 -->
   <TresOrthographicCamera
@@ -49,35 +47,28 @@ watch(akuAkuRef, (model) => {
     :position="[5, 1.5, 10]"
   />
 
-  <!-- パースカメラの設定 -->
-  <!-- <TresPerspectiveCamera :position="[5, 5, 5]" /> -->
-
   <!-- 視点操作の設定 -->
-  <!-- <OrbitControls /> -->
-  <!-- <OrbitControls :enablePan="false" /> -->
-  <!-- <OrbitControls :enableRotate="false" :enablePan="false" /> -->
-  <!-- <OrbitControls :target="[0.2, 1.4, 0]" /> -->
-  <OrbitControls ref="controls" />
-
+  <OrbitControls />
 
   <!-- ライト設定 -->
-  <TresAmbientLight :intensity="1.0" />
+  <TresAmbientLight :intensity="2" />
   <TresDirectionalLight :position="[2, 2, 2]" />
 
+  <!-- モデル設定 -->
   <primitive
    :object="model"
-   :position="[0, -1.5, 0]" />
+   :position="[0, -1.5, 0]"
+  />
 
   <!-- 軸表示オブジェクト -->
   <TresAxesHelper
    :position="[0, -1.5, 0]"
-   />
+  />
 
   <!-- グリッドオブジェクト -->
   <TresGridHelper
    :args="[10, 10, 0x444444, 'teal']"
    :position="[0, -1.5, 0]"
-    />
-
+  />
 </template>
 
