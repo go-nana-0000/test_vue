@@ -52,6 +52,20 @@ function playAction(name: string) {
   }
 }
 
+
+const props = defineProps({
+  action: String
+})
+
+watch(() => props.action, (newAction) => {
+  // actions[newAction]?.play()
+  if (newAction) {
+    playAction(newAction)
+    console.log(`animations name: Walk`)
+  }
+})
+
+
 // アニメーションミキサー設定
 let mixer: THREE.AnimationMixer | null = null
 onMounted(() => {
@@ -74,36 +88,6 @@ onMounted(() => {
   // 名前でアクセスできるように登録する処理
   gltf.animations.forEach((clip) => {
     actions[clip.name] = mixer!.clipAction(clip)
-  })
-
-  // キー入力系処理
-  window.addEventListener('keydown', (e) => {
-    if (!mixer) return
-
-    switch (e.key) {
-      case "ArrowUp":
-        mixer.timeScale += 0.1
-        logTimeScale()
-        break
-      case "ArrowDown":
-        mixer.timeScale = Math.max(0, mixer.timeScale - 0.1)
-        logTimeScale()
-        break
-      case "w":
-        if (currentAnimNum != Anim.Walk) {
-          playAction("Walk")
-          currentAnimNum = Anim.Walk
-          console.log(`animations name: Walk`)
-        }
-        break
-      case "s":
-        if (currentAnimNum != Anim.Stand) {
-          playAction("Stand")
-          currentAnimNum = Anim.Stand
-          console.log(`animations name: Stand`)
-        }
-        break
-    }
   })
 })
 
