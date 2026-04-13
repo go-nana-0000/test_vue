@@ -7,6 +7,7 @@ import { ref, watch, onMounted, onUnmounted, shallowRef} from 'vue'
 import * as THREE from 'three'
 import { useGLTF, OrbitControls} from '@tresjs/cientos'
 import { useRenderLoop } from '@tresjs/core'
+import { useCameraSettings } from '../composables/useCameraSettings'
 
 // 描画前のエラー処理
 onUnmounted(() => {
@@ -112,20 +113,8 @@ onLoop(({ delta }) => {
   if (mixer) mixer.update(delta)
 })
 
-// 平行カメラ設定
-const aspect = window.innerWidth / window.innerHeight
-const size = 5
-const left = ref(-size * aspect)
-const right = ref(size * aspect)
-const top = ref(size)
-const bottom = ref(-size)
-
-// カメラのズーム設定
-const baseZoom = 150; // PCのときのzoom
-const baseWidth = 600; // PCの描画幅
-const factor = 0.7; // 影響度
-const scale = 1 + (window.innerWidth / baseWidth - 1) * factor;
-const cameraZoom = baseZoom * scale;
+// カメラ設定読み込み
+const { left, right, top, bottom, cameraZoom } = useCameraSettings()
 
 </script>
 <!-- スクリプト設定ここまで -->
@@ -155,8 +144,6 @@ const cameraZoom = baseZoom * scale;
     groundColor="#444444"
     :intensity="0.8"
   />
-
-
 
   <!-- モデル設定 -->
   <primitive
