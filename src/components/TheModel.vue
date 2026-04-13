@@ -7,6 +7,7 @@ import { ref, watch, onMounted, onUnmounted, shallowRef} from 'vue'
 import * as THREE from 'three'
 import { useGLTF, OrbitControls} from '@tresjs/cientos'
 import { useRenderLoop } from '@tresjs/core'
+import { useCameraSettings } from '../composables/useCameraSettings'
 
 // 描画前のエラー処理
 onUnmounted(() => {
@@ -21,7 +22,7 @@ enum Anim {
 
 // サメ船長のモデル
 const model = shallowRef<THREE.Object3D | null>(null)
-const gltf = await useGLTF('./test_shark_captain.glb', { draco: true })
+const gltf = await useGLTF('./shark_captain.glb', { draco: true })
 model.value = gltf.scene
 const actions: Record<string, THREE.AnimationAction> = {}
 
@@ -51,6 +52,20 @@ function playAction(name: string) {
   }
 }
 
+
+const props = defineProps({
+  action: String
+})
+
+watch(() => props.action, (newAction) => {
+  // actions[newAction]?.play()
+  if (newAction) {
+    playAction(newAction)
+    console.log(`animations name: Walk`)
+  }
+})
+
+
 // アニメーションミキサー設定
 let mixer: THREE.AnimationMixer | null = null
 onMounted(() => {
@@ -74,36 +89,6 @@ onMounted(() => {
   gltf.animations.forEach((clip) => {
     actions[clip.name] = mixer!.clipAction(clip)
   })
-
-  // キー入力系処理
-  window.addEventListener('keydown', (e) => {
-    if (!mixer) return
-
-    switch (e.key) {
-      case "ArrowUp":
-        mixer.timeScale += 0.1
-        logTimeScale()
-        break
-      case "ArrowDown":
-        mixer.timeScale = Math.max(0, mixer.timeScale - 0.1)
-        logTimeScale()
-        break
-      case "w":
-        if (currentAnimNum != Anim.Walk) {
-          playAction("Walk")
-          currentAnimNum = Anim.Walk
-          console.log(`animations name: Walk`)
-        }
-        break
-      case "s":
-        if (currentAnimNum != Anim.Stand) {
-          playAction("Stand")
-          currentAnimNum = Anim.Stand
-          console.log(`animations name: Stand`)
-        }
-        break
-    }
-  })
 })
 
 // ループ設定
@@ -112,13 +97,9 @@ onLoop(({ delta }) => {
   if (mixer) mixer.update(delta)
 })
 
-// 平行カメラ設定
-const aspect = window.innerWidth / window.innerHeight
-const size = 5
-const left = ref(-size * aspect)
-const right = ref(size * aspect)
-const top = ref(size)
-const bottom = ref(-size)
+// カメラ設定読み込み
+const { left, right, top, bottom, cameraZoom } = useCameraSettings()
+
 </script>
 <!-- スクリプト設定ここまで -->
 
@@ -126,7 +107,7 @@ const bottom = ref(-size)
 <template>
   <!-- 平行カメラの設定 -->
   <TresOrthographicCamera
-    :zoom="200"
+    :zoom="cameraZoom"
     :left="left"
     :right="right"
     :top="top"
@@ -140,8 +121,13 @@ const bottom = ref(-size)
   <OrbitControls />
 
   <!-- ライト設定 -->
-  <TresAmbientLight :intensity="2" />
-  <TresDirectionalLight :position="[2, 2, 2]" />
+  <TresAmbientLight :intensity="1.5" />
+  <TresDirectionalLight :position="[2, 2, 2]" :intensity="1.5" />
+  <TresHemisphereLight
+    skyColor="#ffffff"
+    groundColor="#444444"
+    :intensity="0.8"
+  />
 
   <!-- モデル設定 -->
   <primitive
