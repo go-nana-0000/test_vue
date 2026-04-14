@@ -3,13 +3,17 @@ import { TresCanvas } from '@tresjs/core'
 import { ref } from 'vue'
 import TheModel from './components/TheModel.vue'
 
-const currentAction = ref("Stand")
+const modelRef = ref<InstanceType<typeof TheModel> | null>(null)
+const currentAction = ref(0)
 
 function walk() {
-  currentAction.value = "Walk"
+  if (!modelRef.value || !modelRef.value.Anim) return
+  currentAction.value = modelRef.value.Anim.Walk
 }
+
 function stop() {
-  currentAction.value = "Stand"
+  if (!modelRef.value || !modelRef.value.Anim) return
+  currentAction.value = modelRef.value.Anim.Stand
 }
 </script>
 
@@ -24,7 +28,7 @@ function stop() {
         class="canvas"
 
         <Suspense>
-          <TheModel :action="currentAction" />
+          <TheModel ref="modelRef" :action="currentAction" />
         </Suspense>
       </TresCanvas>
     </div>

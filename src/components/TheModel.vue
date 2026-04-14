@@ -3,98 +3,38 @@
 <script setup lang="ts">
 
 // 各種インポート設定
-import { ref, watch, onMounted, onUnmounted, shallowRef} from 'vue'
-import * as THREE from 'three'
-import { useGLTF, OrbitControls} from '@tresjs/cientos'
-import { useRenderLoop } from '@tresjs/core'
+import { ref, watch, onUnmounted} from 'vue'
+import { OrbitControls} from '@tresjs/cientos'
 import { useCameraSettings } from '../composables/useCameraSettings'
+import { useModelAnimation } from '../composables/useModelAnimation'
+
+// expose する入れ物を先に作る
+const Anim = ref<Record<string, number> | null>(null)
+const playFn = ref<((n: number) => void) | null>(null)
+
+defineExpose({
+  Anim,
+  play: playFn
+})
 
 // 描画前のエラー処理
 onUnmounted(() => {
   console.log('destroy')
 })
 
-// アニメーション管理番号
-enum Anim {
-  Stand = 0,
-  Walk = 1,
-}
+// アニメーション切り替えの監視
+const props = defineProps<{
+  action: number
+}>()
 
-// サメ船長のモデル
-const model = shallowRef<THREE.Object3D | null>(null)
-const gltf = await useGLTF('./shark_captain.glb', { draco: true })
-model.value = gltf.scene
-const actions: Record<string, THREE.AnimationAction> = {}
+// composable から取得
+const { model, play, Anim: AnimRaw } = await useModelAnimation('./shark_captain.glb')
 
-// ログ表示系処理
-const logTimeScale = () => {
-  if (!mixer) return
-  console.log(`timeScale: ${mixer.timeScale.toFixed(2)}`)
-}
-
-const logAnimationName = (num: number) => {
-  if (!gltf) return
-  console.log(`animations name: ${gltf.animations[num].name}`)
-}
-
-
-// アニメーション切り替え
-function playAction(name: string) {
-  if (!mixer) return
-
-  // すべてのアクションをフェードアウト
-  Object.values(actions).forEach(a => a.fadeOut(0.2))
-
-  // 指定アクションをフェードイン
-  const action = actions[name]
-  if (action) {
-    action.reset().fadeIn(0.2).play()
-  }
-}
-
-
-const props = defineProps({
-  action: String
-})
+Anim.value = AnimRaw
+playFn.value = play
 
 watch(() => props.action, (newAction) => {
-  // actions[newAction]?.play()
-  if (newAction) {
-    playAction(newAction)
-    console.log(`animations name: Walk`)
-  }
-})
-
-
-// アニメーションミキサー設定
-let mixer: THREE.AnimationMixer | null = null
-onMounted(() => {
-  if (!gltf.scene) {
-    console.error('GLTF scene is undefined')
-    return
-  }
-
-  // 初期アニメ設定
-  var currentAnimNum = Anim.Stand
-
-  //アニメーションを再生するための AnimationMixer を作成
-  mixer = new THREE.AnimationMixer(gltf.scene)
-  const action = mixer.clipAction(gltf.animations[currentAnimNum])
-  action.play()
-  logAnimationName(currentAnimNum)
-  console.log(`animations name: ${gltf.animations[currentAnimNum].name}`)
-
-  // GLB 内のすべてのアニメーションを AnimationAction に変換し、
-  // 名前でアクセスできるように登録する処理
-  gltf.animations.forEach((clip) => {
-    actions[clip.name] = mixer!.clipAction(clip)
-  })
-})
-
-// ループ設定
-const { onLoop } = useRenderLoop()
-onLoop(({ delta }) => {
-  if (mixer) mixer.update(delta)
+  if (playFn.value) playFn.value(newAction)
 })
 
 // カメラ設定読み込み

@@ -1,3 +1,4 @@
+/* カメラ設定を管理するComposable */
 import { ref } from 'vue'
 
 /* カメラ設定 */
