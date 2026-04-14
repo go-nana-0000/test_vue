@@ -3,12 +3,11 @@ html,
   background-color: #ffffff;
 }
 
-/* #canvas-wrapper {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  max-width: 600px;
-  margin: 0 auto;
-} */
+/* 全体のレイアウト設定 */
+#layout {
+  display: flex;
+  flex-direction: column;
+}
 
 /* スマホ（600px以下): 可変 */
 #canvas-wrapper {
@@ -25,3 +24,25 @@ html,
     margin: 0 auto;
   }
 }
+
+/* UIエリアのスタイル */
+.ui-area {
+  padding: 10px;
+  background: #f7f7f7;
+}
+
+/* UI系中央ぞろえのためのボックス */
+.center-box {
+  max-width: 600px;
+  margin: 0 auto; /* 中央寄せ */
+  width: 100%;
+}
+
+/* ボタンのスタイル */
+.ui-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+

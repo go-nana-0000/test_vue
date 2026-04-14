@@ -50,35 +50,3 @@ function stop() {
     </div>
   </div>
 </template>
-<style>
-
-/* Canvas の高さを固定（例：70vh） */
-.canvas {
-  width: 100%;
-  height: 70vh;
-}
-
-#layout {
-  display: flex;
-  flex-direction: column;
-}
-
-.ui-area {
-  padding: 10px;
-  background: #f7f7f7;
-}
-
-.ui-buttons {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
-
-.center-box {
-  max-width: 600px;
-  margin: 0 auto; /* 中央寄せ */
-  width: 100%;
-}
-
-
-</style>
