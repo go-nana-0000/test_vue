@@ -13,8 +13,10 @@ export function useCameraSettings() {
     // カメラのズーム設定
     const baseZoom = 150; // PCのときのzoom
     const baseWidth = 600; // PCの描画幅
-    const factor = 0.7; // 影響度
-    const scale = 1 + (window.innerWidth / baseWidth - 1) * factor;
+    var scale = 1;
+    if (window.innerWidth < baseWidth) {
+      scale = window.innerWidth / baseWidth;
+    }
     const cameraZoom = baseZoom * scale;
 
   return {
