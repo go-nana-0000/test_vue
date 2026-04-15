@@ -61,13 +61,20 @@ const { left, right, top, bottom, cameraZoom } = useCameraSettings()
   <OrbitControls />
 
   <!-- ライト設定 -->
-  <TresAmbientLight :intensity="1.5" />
-  <TresDirectionalLight :position="[2, 2, 2]" :intensity="1.5" />
-  <TresHemisphereLight
-    skyColor="#ffffff"
-    groundColor="#444444"
-    :intensity="0.8"
-  />
+  <TresAmbientLight :intensity="0.4" />
+
+<TresDirectionalLight
+  :position="[5, 8, 5]"
+  :intensity="3.5"
+  cast-shadow
+  :shadow-mapSize-width="2048"
+  :shadow-mapSize-height="2048"
+  :shadow-bias="-0.0001"
+  :shadow-camera-left="-5"
+  :shadow-camera-right="5"
+  :shadow-camera-top="5"
+  :shadow-camera-bottom="-5"
+/>
 
   <!-- モデル設定 -->
   <primitive

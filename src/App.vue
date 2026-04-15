@@ -2,6 +2,7 @@
 import { TresCanvas } from '@tresjs/core'
 import { ref } from 'vue'
 import TheModel from './components/TheModel.vue'
+import * as THREE from 'three'
 
 const modelRef = ref<InstanceType<typeof TheModel> | null>(null)
 const currentAction = ref(0)
@@ -21,11 +22,14 @@ function stop() {
   <div id="layout">
     <div id="canvas-wrapper">
       <TresCanvas
+        class="canvas"
+        shadows
         :window-size="false"
         :resize="false"
+        :tone-mapping="THREE.NoToneMapping"
+        :output-color-space="THREE.SRGBColorSpace"
         clear-color="#a9a9a9"
         style="width: 100%; height: 100vh;">
-        class="canvas"
 
         <Suspense>
           <TheModel ref="modelRef" :action="currentAction" />
