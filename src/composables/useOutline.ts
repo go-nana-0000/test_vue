@@ -11,7 +11,7 @@ export function applyOutline(object: THREE.Object3D) {
     const outlineMesh = new THREE.SkinnedMesh(
       skinned.geometry,
       new OutlineSkinnedMaterial({
-        outlineThickness: 0.01,
+        outlineThickness: 0.007,
         outlineColor: new THREE.Color(0x84538c)
       })
     )

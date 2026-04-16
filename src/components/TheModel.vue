@@ -7,7 +7,6 @@ import { ref, watch, onUnmounted} from 'vue'
 import { OrbitControls} from '@tresjs/cientos'
 import { useCameraSettings } from '../composables/useCameraSettings'
 import { useModelWithFeatures } from '../composables/useModelWithFeatures'
-import { useModelStatic } from '../composables/useModelStatic'
 
 // expose する入れ物を先に作る
 const Anim = ref<Record<string, number> | null>(null)

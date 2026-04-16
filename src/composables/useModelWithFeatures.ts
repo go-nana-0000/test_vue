@@ -9,13 +9,13 @@ const FEATURE_PRESETS = {
     toon: true,
     outline: true,
     animation: true,
-    shadow: true,
+    shadow: false,
   },
   static: {
     toon: true,
     outline: true,
     animation: false,
-    shadow: true,
+    shadow: false,
   },
 } as const
 
