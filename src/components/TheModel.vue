@@ -6,7 +6,8 @@
 import { ref, watch, onUnmounted} from 'vue'
 import { OrbitControls} from '@tresjs/cientos'
 import { useCameraSettings } from '../composables/useCameraSettings'
-import { useModelAnimation } from '../composables/useModelAnimation'
+import { useModelWithFeatures } from '../composables/useModelWithFeatures'
+import { useModelStatic } from '../composables/useModelStatic'
 
 // expose する入れ物を先に作る
 const Anim = ref<Record<string, number> | null>(null)
@@ -28,7 +29,13 @@ const props = defineProps<{
 }>()
 
 // composable から取得
-const { model, play, Anim: AnimRaw } = await useModelAnimation('./shark_captain.glb')
+const { model, play, Anim: AnimRaw } = await useModelWithFeatures('./shark_captain.glb', {
+  preset: 'character'
+})
+
+const { model: test_base_model } = await useModelWithFeatures('./test_base.glb', {
+  preset: 'static'
+})
 
 Anim.value = AnimRaw
 playFn.value = play
@@ -61,11 +68,11 @@ const { left, right, top, bottom, cameraZoom } = useCameraSettings()
   <OrbitControls />
 
   <!-- ライト設定 -->
-  <TresAmbientLight :intensity="0.4" />
+  <TresAmbientLight :intensity="2.5" />
 
 <TresDirectionalLight
-  :position="[5, 8, 5]"
-  :intensity="3.5"
+  :position="[5, 10, 5]"
+  :intensity="1.0"
   cast-shadow
   :shadow-mapSize-width="2048"
   :shadow-mapSize-height="2048"
@@ -75,22 +82,25 @@ const { left, right, top, bottom, cameraZoom } = useCameraSettings()
   :shadow-camera-top="5"
   :shadow-camera-bottom="-5"
 />
-
+<TresGroup :position="[0, -1, 0]">
   <!-- モデル設定 -->
   <primitive
    :object="model"
-   :position="[0, -1.5, 0]"
-  />
+   />
+
+  <primitive
+   :object="test_base_model"
+   />
 
   <!-- 軸表示オブジェクト -->
   <TresAxesHelper
-   :position="[0, -1.5, 0]"
   />
 
   <!-- グリッドオブジェクト -->
   <TresGridHelper
    :args="[10, 10, 0x444444, 'teal']"
-   :position="[0, -1.5, 0]"
   />
+</TresGroup>
+
 </template>
 

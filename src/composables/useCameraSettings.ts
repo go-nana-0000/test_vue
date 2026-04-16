@@ -12,7 +12,7 @@ export function useCameraSettings() {
     const bottom = ref(-size)
 
     // カメラのズーム設定
-    const baseZoom = 150; // PCのときのzoom
+    const baseZoom = 250; // PCのときのzoom
     const baseWidth = 600; // PCの描画幅
     var scale = 1;
     if (window.innerWidth < baseWidth) {
