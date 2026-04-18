@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import { useRenderLoop } from '@tresjs/core'
 
 export function useAnimation(gltf: any) {
   const actions: Record<string, THREE.AnimationAction> = {}
@@ -19,7 +18,7 @@ export function useAnimation(gltf: any) {
     if (typeof anim === 'number') {
       index = anim
     } else {
-      index = gltf.animations.findIndex(c => c.name === anim)
+      index = gltf.animations.findIndex((c: any) => c.name === anim)
     }
 
     const clip = gltf.animations[index]

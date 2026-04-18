@@ -1,11 +1,10 @@
 /* モデルアニメーションを管理するComposable */
-import { applyOutline } from './useOutline'
+
 import { useModelLoader } from './useModelLoader'
-import { useAnimation } from './useAnimation'
-import { applyToonMaterial } from './useToonMaterial'
-import { useMorph } from './useMorph'
-import { useAutoBlink } from './useAutoBlink'
 import { useLoopManager } from './useLoopManager'
+import { useModelMorphSystem } from './useModelMorphSystem'
+import { useModelAppearance } from './useModelAppearance'
+import { useModelAnimationSystem } from './useModelAnimationSystem'
 
 type PresetKey = keyof typeof FEATURE_PRESETS
 
@@ -59,57 +58,31 @@ export async function useModelWithFeatures(
 
   const { model, gltf } = await useModelLoader(path)
 
-  console.log('Model loaded:', path)
-
   if (!model.value) return { model, play: null, Anim: null, morph: null }
-
-  if (config.toon) applyToonMaterial(model.value)
-  if (config.outline) applyOutline(model.value)
-
-  model.value.traverse((child: any) => {
-    if (child.isMesh) {
-      child.castShadow = config.shadow
-      child.receiveShadow = config.shadow
-    }
-  })
-
   const loop = useLoopManager()
 
+  // 見た目
+  useModelAppearance(model.value, config)
 
-  let setMorph = null
-  let getMorphList = null
-  let list = []
-  let blink = null
-
+  // モーフ
+  let morphSystem = null
   if (config.morph) {
-    const morph = useMorph(gltf.scene)
-    setMorph = morph.setMorph
-    getMorphList = morph.getMorphList
-
-    list = getMorphList()
-    blink = useAutoBlink(gltf.scene, setMorph)
-    loop.add(blink.update)
-    console.log(list)
+    morphSystem = useModelMorphSystem(gltf.scene, loop)
   }
 
+  // アニメーション
   let anim = null
-  anim = config.animation
-    ? useAnimation(gltf)
-    : {
-      play: () => {},
-      Anim: {},
-      update: () => {},
-    }
   if (config.animation) {
-    loop.add(anim.update)
-    console.log('Playing initial animation:', config.initialAnimation)
-    if (config.initialAnimation) {
-      anim.play(config.initialAnimation)
-    }
+    anim = useModelAnimationSystem(
+      gltf,
+      loop,
+      config.initialAnimation
+    )
   }
 
   return {
     model,
     ...anim,
+    ...morphSystem,
   }
 }

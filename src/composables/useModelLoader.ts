@@ -7,6 +7,7 @@ export async function useModelLoader(path: string) {
 
   const gltf = await useGLTF(path, { draco: true })
   model.value = gltf.scene
+  console.log('Model loaded:', path)
 
   return {
     model,
