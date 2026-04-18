@@ -21,11 +21,13 @@ export function useAnimation(gltf: any) {
     actions[clip.name].reset().fadeIn(0.2).play()
   }
 
-  const { onLoop } = useRenderLoop()
-  onLoop(({ delta }) => mixer.update(delta))
+  function update(delta: number) {
+    mixer.update(delta)
+  }
 
   return {
     play,
-    Anim
+    Anim,
+    update: mixer.update.bind(mixer), // 常に存在
   }
 }

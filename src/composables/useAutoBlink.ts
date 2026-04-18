@@ -66,5 +66,7 @@ export function useAutoBlink(
     }
   }
 
-  return { update }
+  return {
+    update
+  }
 }

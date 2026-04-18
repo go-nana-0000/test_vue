@@ -1,11 +1,11 @@
 /* モデルアニメーションを管理するComposable */
 import { applyOutline } from './useOutline'
-import { useModel } from './useModel'
+import { useModelLoader } from './useModelLoader'
 import { useAnimation } from './useAnimation'
 import { applyToonMaterial } from './useToonMaterial'
 import { useMorph } from './useMorph'
 import { useAutoBlink } from './useAutoBlink'
-import { useRenderLoop } from '@tresjs/core'
+import { useLoopManager } from './useLoopManager'
 
 type PresetKey = keyof typeof FEATURE_PRESETS
 
@@ -53,7 +53,7 @@ export async function useModelWithFeatures(
     ...options, // 手動指定で上書き可能
   }
 
-  const { model, gltf } = await useModel(path)
+  const { model, gltf } = await useModelLoader(path)
 
   console.log('Model loaded:', path)
 
@@ -69,18 +69,29 @@ export async function useModelWithFeatures(
     }
   })
 
-  const morphMeshes = []
-
   const { setMorph, getMorphList } = useMorph(gltf.scene)
   const list = getMorphList()
   console.log(list)
+  const loop = useLoopManager()
 
-  const blink = useAutoBlink(gltf.scene, setMorph)
+  let blink = null
+  if (config.morph) {
+    blink = useAutoBlink(gltf.scene, setMorph)
+    loop.add(blink.update)
+  }
 
-  const { onLoop } = useRenderLoop()
-  onLoop(({ delta }) => blink.update(delta))
+  let anim = null
+  anim = config.animation
+    ? useAnimation(gltf)
+    : {
+      play: () => {},
+      Anim: {},
+      update: () => {},
+    }
+  if (config.animation) {
+    loop.add(anim.update)
+  }
 
-  const anim = config.animation ? useAnimation(gltf) : { play: null, Anim: null }
   return {
     model,
     ...anim,
