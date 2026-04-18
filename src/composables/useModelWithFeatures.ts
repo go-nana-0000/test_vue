@@ -3,6 +3,7 @@ import { applyOutline } from './useOutline'
 import { useModel } from './useModel'
 import { useAnimation } from './useAnimation'
 import { applyToonMaterial } from './useToonMaterial'
+import { useMorph } from './useMorph'
 
 type PresetKey = keyof typeof FEATURE_PRESETS
 
@@ -12,6 +13,7 @@ type Options = {
   outline?: boolean
   animation?: boolean
   shadow?: boolean
+  morph?: boolean
 }
 
 const FEATURE_PRESETS = {
@@ -20,12 +22,14 @@ const FEATURE_PRESETS = {
     outline: true,
     animation: true,
     shadow: false,
+    morph: true,
   },
   static: {
     toon: true,
     outline: true,
     animation: false,
     shadow: false,
+    morph: false,
   },
 } as const
 
@@ -42,6 +46,7 @@ export async function useModelWithFeatures(
     outline: false,
     animation: false,
     shadow: false,
+    morph: false,
     ...preset,
     ...options, // 手動指定で上書き可能
   }
@@ -50,7 +55,7 @@ export async function useModelWithFeatures(
 
   console.log('Model loaded:', path)
 
-  if (!model.value) return { model, play: null, Anim: null }
+  if (!model.value) return { model, play: null, Anim: null, morph: null }
 
   if (config.toon) applyToonMaterial(model.value)
   if (config.outline) applyOutline(model.value)
@@ -62,8 +67,14 @@ export async function useModelWithFeatures(
     }
   })
 
-  const anim = config.animation ? useAnimation(gltf) : { play: null, Anim: null }
+  const morphMeshes = []
 
+  const { setMorph, getMorphList } = useMorph(gltf.scene)
+  setMorph("Blink", 1)
+  const list = getMorphList()
+  console.log(list)
+
+  const anim = config.animation ? useAnimation(gltf) : { play: null, Anim: null }
   return {
     model,
     ...anim,
