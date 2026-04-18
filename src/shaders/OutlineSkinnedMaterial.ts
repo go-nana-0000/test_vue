@@ -1,4 +1,4 @@
-import { ShaderMaterial ,Matrix4} from 'three'
+import { ShaderMaterial, Matrix4 } from 'three'
 import * as THREE from 'three'
 
 export class OutlineSkinnedMaterial extends THREE.ShaderMaterial {
@@ -8,7 +8,7 @@ export class OutlineSkinnedMaterial extends THREE.ShaderMaterial {
         outlineThickness: { value: params.outlineThickness },
         outlineColor: { value: params.outlineColor }
       },
-    vertexShader: `
+      vertexShader: `
       #define USE_SKINNING
 
       uniform float outlineThickness;

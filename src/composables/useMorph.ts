@@ -5,13 +5,13 @@ export function useMorph(scene: THREE.Object3D) {
 
   function setMorph(name: string, value: number) {
     scene.traverse((child: THREE.Object3D) => {
-        if (!(child instanceof THREE.Mesh)) return
-        if (!child.morphTargetDictionary || !child.morphTargetInfluences) return
+      if (!(child instanceof THREE.Mesh)) return
+      if (!child.morphTargetDictionary || !child.morphTargetInfluences) return
 
-        const index = child.morphTargetDictionary[name]
-        if (index !== undefined) {
+      const index = child.morphTargetDictionary[name]
+      if (index !== undefined) {
         child.morphTargetInfluences[index] = value
-        }
+      }
     })
   }
 
@@ -24,16 +24,16 @@ export function useMorph(scene: THREE.Object3D) {
     scene.traverse((child) => {
       if (!(child instanceof THREE.Mesh)) return
       if (!child.morphTargetDictionary) return
-        if (!child.name) return
+      if (!child.name) return
 
-        result.push({
+      result.push({
         name: child.name || "(unnamed mesh)",
         morphs: Object.keys(child.morphTargetDictionary)
-        })
+      })
     })
 
     return result
-    }
+  }
   return {
     setMorph,
     getMorphList

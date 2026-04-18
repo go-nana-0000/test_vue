@@ -38,8 +38,8 @@ export async function useModelWithFeatures(
   options: Options = {}
 ) {
   const preset = options.preset
-  ? FEATURE_PRESETS[options.preset]
-  : {}
+    ? FEATURE_PRESETS[options.preset]
+    : {}
 
   const config = {
     toon: false,
