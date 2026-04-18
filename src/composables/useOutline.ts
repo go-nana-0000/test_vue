@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { OutlineSkinnedMaterial } from '../shaders/OutlineSkinnedMaterial'
+import { OutlineSkinnedMaterial } from '@/shaders/OutlineSkinnedMaterial'
 
 export function applyOutline(object: THREE.Object3D) {
   object.traverse((child) => {

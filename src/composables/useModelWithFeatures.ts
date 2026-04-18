@@ -4,6 +4,16 @@ import { useModel } from './useModel'
 import { useAnimation } from './useAnimation'
 import { applyToonMaterial } from './useToonMaterial'
 
+type PresetKey = keyof typeof FEATURE_PRESETS
+
+type Options = {
+  preset?: PresetKey
+  toon?: boolean
+  outline?: boolean
+  animation?: boolean
+  shadow?: boolean
+}
+
 const FEATURE_PRESETS = {
   character: {
     toon: true,
@@ -19,8 +29,13 @@ const FEATURE_PRESETS = {
   },
 } as const
 
-export async function useModelWithFeatures(path: string, options: any = {}) {
-  const preset = options.preset ? FEATURE_PRESETS[options.preset] : {}
+export async function useModelWithFeatures(
+  path: string,
+  options: Options = {}
+) {
+  const preset = options.preset
+  ? FEATURE_PRESETS[options.preset]
+  : {}
 
   const config = {
     toon: false,

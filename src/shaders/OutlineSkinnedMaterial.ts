@@ -2,7 +2,7 @@ import { ShaderMaterial ,Matrix4} from 'three'
 import * as THREE from 'three'
 
 export class OutlineSkinnedMaterial extends THREE.ShaderMaterial {
-  constructor(params) {
+  constructor(params: any) {
     super({
       uniforms: {
         outlineThickness: { value: params.outlineThickness },
