@@ -10,6 +10,7 @@ export function useAnimation(gltf: any) {
   gltf.animations.forEach((clip: THREE.AnimationClip, index: number) => {
     Anim[clip.name] = index
     actions[clip.name] = mixer.clipAction(clip)
+    console.log('Anime num:', '[', index, '],', clip.name)
   })
 
   function play(animIndex: number) {

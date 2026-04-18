@@ -48,6 +48,8 @@ export async function useModelWithFeatures(
 
   const { model, gltf } = await useModel(path)
 
+  console.log('Model loaded:', path)
+
   if (!model.value) return { model, play: null, Anim: null }
 
   if (config.toon) applyToonMaterial(model.value)
