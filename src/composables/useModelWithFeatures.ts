@@ -4,6 +4,8 @@ import { useModel } from './useModel'
 import { useAnimation } from './useAnimation'
 import { applyToonMaterial } from './useToonMaterial'
 import { useMorph } from './useMorph'
+import { useAutoBlink } from './useAutoBlink'
+import { useRenderLoop } from '@tresjs/core'
 
 type PresetKey = keyof typeof FEATURE_PRESETS
 
@@ -70,9 +72,13 @@ export async function useModelWithFeatures(
   const morphMeshes = []
 
   const { setMorph, getMorphList } = useMorph(gltf.scene)
-  setMorph("Blink", 1)
   const list = getMorphList()
   console.log(list)
+
+  const blink = useAutoBlink(gltf.scene, setMorph)
+
+  const { onLoop } = useRenderLoop()
+  onLoop(({ delta }) => blink.update(delta))
 
   const anim = config.animation ? useAnimation(gltf) : { play: null, Anim: null }
   return {
