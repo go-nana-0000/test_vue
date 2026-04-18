@@ -16,6 +16,7 @@ type Options = {
   animation?: boolean
   shadow?: boolean
   morph?: boolean
+  initialAnimation?: string
 }
 
 const FEATURE_PRESETS = {
@@ -25,6 +26,7 @@ const FEATURE_PRESETS = {
     animation: true,
     shadow: false,
     morph: true,
+    initialAnimation: 'Idle',
   },
   static: {
     toon: true,
@@ -32,6 +34,7 @@ const FEATURE_PRESETS = {
     animation: false,
     shadow: false,
     morph: false,
+    initialAnimation: null,
   },
 } as const
 
@@ -49,6 +52,7 @@ export async function useModelWithFeatures(
     animation: false,
     shadow: false,
     morph: false,
+    initialAnimation: null,
     ...preset,
     ...options, // 手動指定で上書き可能
   }
@@ -69,15 +73,23 @@ export async function useModelWithFeatures(
     }
   })
 
-  const { setMorph, getMorphList } = useMorph(gltf.scene)
-  const list = getMorphList()
-  console.log(list)
   const loop = useLoopManager()
 
+
+  let setMorph = null
+  let getMorphList = null
+  let list = []
   let blink = null
+
   if (config.morph) {
+    const morph = useMorph(gltf.scene)
+    setMorph = morph.setMorph
+    getMorphList = morph.getMorphList
+
+    list = getMorphList()
     blink = useAutoBlink(gltf.scene, setMorph)
     loop.add(blink.update)
+    console.log(list)
   }
 
   let anim = null
@@ -90,6 +102,10 @@ export async function useModelWithFeatures(
     }
   if (config.animation) {
     loop.add(anim.update)
+    console.log('Playing initial animation:', config.initialAnimation)
+    if (config.initialAnimation) {
+      anim.play(config.initialAnimation)
+    }
   }
 
   return {

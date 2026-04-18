@@ -13,12 +13,22 @@ export function useAnimation(gltf: any) {
     console.log('Anime num:', '[', index, '],', clip.name)
   })
 
-  function play(animIndex: number) {
-    const clip = gltf.animations[animIndex]
+  function play(anim: number | string) {
+    let index = -1
+
+    if (typeof anim === 'number') {
+      index = anim
+    } else {
+      index = gltf.animations.findIndex(c => c.name === anim)
+    }
+
+    const clip = gltf.animations[index]
     if (!clip) return
 
     Object.values(actions).forEach(a => a.fadeOut(0.2))
     actions[clip.name].reset().fadeIn(0.2).play()
+
+    console.log('Playing animation:', clip.name)
   }
 
   function update(delta: number) {

@@ -14,7 +14,7 @@ function walk() {
 
 function stop() {
   if (!modelRef.value || !modelRef.value.Anim) return
-  currentAction.value = modelRef.value.Anim.Stand
+  currentAction.value = modelRef.value.Anim.Idle
 }
 </script>
 
