@@ -58,33 +58,39 @@ export async function useModelWithFeatures(
 
   const { model, gltf } = await useModelLoader(path)
 
-  if (!model.value) return { model, play: null, Anim: null, morph: null }
+  if (!model.value) return { model, play: null, Anim: null, setMorph: null, getMorphList: null }
   const loop = useLoopManager()
 
   // 見た目
   useModelAppearance(model.value, config)
 
   // モーフ
-  let morphSystem = { setMorph: null, getMorphList: null }
+  let setMorph: ((name: string, value: number) => void) | null = null
+  let getMorphList: (() => { name: string; morphs: string[]; }[]) | null = null
   if (config.morph) {
-    morphSystem = useModelMorphSystem(gltf.scene, loop)
+    const morphResult = useModelMorphSystem(gltf.scene, loop)
+    setMorph = morphResult.setMorph
+    getMorphList = morphResult.getMorphList
   }
 
   // アニメーション
-  let anim = { play: null, Anim: null }
+  let play: ((anim: number | string) => void) | null = null
+  let Anim: Record<string, number> | null = null
   if (config.animation) {
-    anim = useModelAnimationSystem(
+    const animResult = useModelAnimationSystem(
       gltf,
       loop,
       config.initialAnimation
     )
+    play = animResult.play
+    Anim = animResult.Anim
   }
 
-  const result = {
+  return {
     model,
-    ...anim,
-    ...morphSystem,
+    play,
+    Anim,
+    setMorph,
+    getMorphList,
   }
-
-  return result
 }
