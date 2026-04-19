@@ -14,8 +14,8 @@ export function useModelMorphSystem(
   const list = getMorphList()
   console.log(list)
 
-  const blink = useAutoBlink(scene, setMorph)
-  loop.add(blink.update)
+  // const blink = useAutoBlink(scene, setMorph)
+  // loop.add(blink.update)
 
   return {
     setMorph,

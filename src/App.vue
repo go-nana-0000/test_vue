@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { TresCanvas } from '@tresjs/core'
-import { ref, watchEffect } from 'vue'
+import { ref, watchEffect, watch } from 'vue'
 import TheModel from './components/TheModel.vue'
 import * as THREE from 'three'
 
@@ -13,6 +13,8 @@ const availableActions = ref<string[]>([])
 const actionMap = ref<Record<string, number>>({})
 const morphNames = ref<string[]>([])
 
+const modelReady = ref(false)
+
 function onModelReady(payload: { actionMap: Record<string, number>; morphNames: string[] }) {
   actionMap.value = payload.actionMap
   availableActions.value = Object.keys(payload.actionMap)
@@ -21,6 +23,7 @@ function onModelReady(payload: { actionMap: Record<string, number>; morphNames: 
   if (!selectedAnimation.value && availableActions.value.length) {
     selectedAnimation.value = availableActions.value[0]
   }
+  modelReady.value = true
 }
 
 watchEffect(() => {
@@ -33,11 +36,28 @@ watchEffect(() => {
   if (morphNames.value.length && !selectedMorph.value) {
     selectedMorph.value = morphNames.value[0]
   }
-  if (selectedMorph.value && modelRef.value?.setMorph) {
-    modelRef.value.setMorph(selectedMorph.value, morphValue.value)
-  }
 })
 
+// モーフの変更を監視してモデルに反映
+watch(
+  [selectedMorph, morphValue, modelReady, () => modelRef.value],
+  () => {
+    const model = modelRef.value
+
+    if (
+      !modelReady.value ||
+      !model ||
+      typeof model.setMorph !== 'function'
+    ) {
+      return
+    }
+
+    requestAnimationFrame(() => {
+      model.setMorph(selectedMorph.value, morphValue.value)
+    })
+  },
+  { immediate: false }
+)
 </script>
 
 <template>

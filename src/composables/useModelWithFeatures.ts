@@ -65,13 +65,13 @@ export async function useModelWithFeatures(
   useModelAppearance(model.value, config)
 
   // モーフ
-  let morphSystem = null
+  let morphSystem = { setMorph: null, getMorphList: null }
   if (config.morph) {
     morphSystem = useModelMorphSystem(gltf.scene, loop)
   }
 
   // アニメーション
-  let anim = null
+  let anim = { play: null, Anim: null }
   if (config.animation) {
     anim = useModelAnimationSystem(
       gltf,
@@ -80,9 +80,11 @@ export async function useModelWithFeatures(
     )
   }
 
-  return {
+  const result = {
     model,
     ...anim,
     ...morphSystem,
   }
+
+  return result
 }

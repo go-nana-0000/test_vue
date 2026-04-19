@@ -3,14 +3,19 @@
 <script setup lang="ts">
 
 // 各種インポート設定
-import { ref, watch, onUnmounted} from 'vue'
-import { OrbitControls} from '@tresjs/cientos'
+import { shallowRef, watch, onUnmounted } from 'vue'
+import { OrbitControls } from '@tresjs/cientos'
 import { useCameraSettings } from '@/composables/useCameraSettings'
 import { useModelWithFeatures } from '@/composables/useModelWithFeatures'
 
 // expose する入れ物を先に作る
-const AnimRef = ref<Record<string, number>>({})
-const playFnRef = ref<((n: number) => void) | null>(null)
+const AnimRef = shallowRef<Record<string, number>>({})
+const playFnRef = shallowRef<((n: number) => void) | null>(null)
+const model = shallowRef<any>(null)
+const test_base_model = shallowRef<any>(null)
+const morphNames = shallowRef<string[]>([])
+const setMorphFn = shallowRef<((name: string, value: number) => void) | null>(null)
+const getMorphListFn = shallowRef<(() => any) | null>(null)
 
 const emit = defineEmits<{
   (e: 'model-ready', payload: {
@@ -29,38 +34,45 @@ const props = defineProps<{
   action: number
 }>()
 
-// composable から取得
-const { model, play, Anim: AnimRaw, setMorph, getMorphList } = await useModelWithFeatures('./shark_captain.glb', {
-  preset: 'character'
-})
-
-const { model: test_base_model } = await useModelWithFeatures('./test_base.glb', {
-  preset: 'static'
-})
-
-AnimRef.value = AnimRaw ?? {}
-playFnRef.value = play ?? null
-
-const morphNames = getMorphList ? getMorphList().flatMap((item) => item.morphs) : []
-
-emit('model-ready', {
-  actionMap: AnimRef.value,
-  morphNames,
-})
-
+// Expose は先に登録しておく
 defineExpose({
   play(action: number) {
     if (playFnRef.value) playFnRef.value(action)
   },
   setMorph(name: string, value: number) {
-    if (setMorph) setMorph(name, value)
+    if (setMorphFn.value) {
+      setMorphFn.value(name, value)
+    }
   },
   getMorphList() {
-    return getMorphList ? getMorphList() : []
+    return getMorphListFn.value?.()
   },
   get morphNames() {
-    return morphNames
+    return morphNames.value
   }
+})
+
+const shark = await useModelWithFeatures('./shark_captain.glb', {
+  preset: 'character'
+})
+
+const sharkStatic = await useModelWithFeatures('./test_base.glb', {
+  preset: 'static'
+})
+
+model.value = shark.model.value ?? null
+test_base_model.value = sharkStatic.model.value ?? null
+AnimRef.value = shark.Anim ?? {}
+playFnRef.value = shark.play ?? null
+setMorphFn.value = shark.setMorph ?? null
+getMorphListFn.value = shark.getMorphList ?? null
+
+const names = getMorphListFn.value ? getMorphListFn.value().flatMap((item: any) => item.morphs) : []
+morphNames.value = names
+
+emit('model-ready', {
+  actionMap: AnimRef.value,
+  morphNames: names,
 })
 
 watch(() => props.action, (newAction) => {
@@ -108,20 +120,20 @@ const { left, right, top, bottom, cameraZoom } = useCameraSettings()
 <TresGroup :position="[0, -1, 0]">
   <!-- モデル設定 -->
   <primitive
-   :object="model"
-   />
-
+    v-if="model"
+    :object="model"
+  />
   <primitive
-   :object="test_base_model"
-   />
+    v-if="test_base_model"
+    :object="test_base_model"
+  />
 
   <!-- 軸表示オブジェクト -->
-  <TresAxesHelper
-  />
+  <TresAxesHelper />
 
   <!-- グリッドオブジェクト -->
   <TresGridHelper
-   :args="[10, 10, 0x444444, 'teal']"
+    :args="[10, 10, 0x444444, 'teal']"
   />
 </TresGroup>
 
