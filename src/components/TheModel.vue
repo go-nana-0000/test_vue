@@ -3,98 +3,80 @@
 <script setup lang="ts">
 
 // 各種インポート設定
-import { ref, watch, onMounted, onUnmounted, shallowRef} from 'vue'
-import * as THREE from 'three'
-import { useGLTF, OrbitControls} from '@tresjs/cientos'
-import { useRenderLoop } from '@tresjs/core'
-import { useCameraSettings } from '../composables/useCameraSettings'
+import { shallowRef, watch, onUnmounted } from 'vue'
+import { OrbitControls } from '@tresjs/cientos'
+import { useCameraSettings } from '@/composables/useCameraSettings'
+import { useModelWithFeatures } from '@/composables/useModelWithFeatures'
+
+// expose する入れ物を先に作る
+const AnimRef = shallowRef<Record<string, number>>({})
+const playFnRef = shallowRef<((n: number) => void) | null>(null)
+const model = shallowRef<any>(null)
+const test_base_model = shallowRef<any>(null)
+const morphNames = shallowRef<string[]>([])
+const setMorphFn = shallowRef<((name: string, value: number) => void) | null>(null)
+const getMorphListFn = shallowRef<(() => any) | null>(null)
+
+const emit = defineEmits<{
+  (e: 'model-ready', payload: {
+    actionMap: Record<string, number>
+    morphNames: string[]
+  }): void
+}>()
 
 // 描画前のエラー処理
 onUnmounted(() => {
   console.log('destroy')
 })
 
-// アニメーション管理番号
-enum Anim {
-  Stand = 0,
-  Walk = 1,
-}
+// アニメーション切り替えの監視
+const props = defineProps<{
+  action: number
+}>()
 
-// サメ船長のモデル
-const model = shallowRef<THREE.Object3D | null>(null)
-const gltf = await useGLTF('./shark_captain.glb', { draco: true })
-model.value = gltf.scene
-const actions: Record<string, THREE.AnimationAction> = {}
-
-// ログ表示系処理
-const logTimeScale = () => {
-  if (!mixer) return
-  console.log(`timeScale: ${mixer.timeScale.toFixed(2)}`)
-}
-
-const logAnimationName = (num: number) => {
-  if (!gltf) return
-  console.log(`animations name: ${gltf.animations[num].name}`)
-}
-
-
-// アニメーション切り替え
-function playAction(name: string) {
-  if (!mixer) return
-
-  // すべてのアクションをフェードアウト
-  Object.values(actions).forEach(a => a.fadeOut(0.2))
-
-  // 指定アクションをフェードイン
-  const action = actions[name]
-  if (action) {
-    action.reset().fadeIn(0.2).play()
+// Expose は先に登録しておく
+defineExpose({
+  play(action: number) {
+    if (playFnRef.value) playFnRef.value(action)
+  },
+  setMorph(name: string, value: number) {
+    if (setMorphFn.value) {
+      setMorphFn.value(name, value)
+    }
+  },
+  getMorphList() {
+    return getMorphListFn.value?.()
+  },
+  get morphNames() {
+    return morphNames.value
   }
-}
+})
 
+const shark = await useModelWithFeatures('./shark_captain.glb', {
+  preset: 'character'
+})
 
-const props = defineProps({
-  action: String
+const sharkStatic = await useModelWithFeatures('./test_base.glb', {
+  preset: 'static'
+})
+
+model.value = shark.model.value ?? null
+test_base_model.value = sharkStatic.model.value ?? null
+AnimRef.value = shark.Anim ?? {}
+playFnRef.value = shark.play ?? null
+setMorphFn.value = shark.setMorph ?? null
+getMorphListFn.value = shark.getMorphList ?? null
+
+const names = getMorphListFn.value ? getMorphListFn.value().flatMap((item: any) => item.morphs) : []
+morphNames.value = names
+
+emit('model-ready', {
+  actionMap: AnimRef.value,
+  morphNames: names,
 })
 
 watch(() => props.action, (newAction) => {
-  // actions[newAction]?.play()
-  if (newAction) {
-    playAction(newAction)
-    console.log(`animations name: Walk`)
-  }
-})
-
-
-// アニメーションミキサー設定
-let mixer: THREE.AnimationMixer | null = null
-onMounted(() => {
-  if (!gltf.scene) {
-    console.error('GLTF scene is undefined')
-    return
-  }
-
-  // 初期アニメ設定
-  var currentAnimNum = Anim.Stand
-
-  //アニメーションを再生するための AnimationMixer を作成
-  mixer = new THREE.AnimationMixer(gltf.scene)
-  const action = mixer.clipAction(gltf.animations[currentAnimNum])
-  action.play()
-  logAnimationName(currentAnimNum)
-  console.log(`animations name: ${gltf.animations[currentAnimNum].name}`)
-
-  // GLB 内のすべてのアニメーションを AnimationAction に変換し、
-  // 名前でアクセスできるように登録する処理
-  gltf.animations.forEach((clip) => {
-    actions[clip.name] = mixer!.clipAction(clip)
-  })
-})
-
-// ループ設定
-const { onLoop } = useRenderLoop()
-onLoop(({ delta }) => {
-  if (mixer) mixer.update(delta)
+  if (playFnRef.value) playFnRef.value(newAction)
 })
 
 // カメラ設定読み込み
@@ -121,29 +103,39 @@ const { left, right, top, bottom, cameraZoom } = useCameraSettings()
   <OrbitControls />
 
   <!-- ライト設定 -->
-  <TresAmbientLight :intensity="1.5" />
-  <TresDirectionalLight :position="[2, 2, 2]" :intensity="1.5" />
-  <TresHemisphereLight
-    skyColor="#ffffff"
-    groundColor="#444444"
-    :intensity="0.8"
-  />
+  <TresAmbientLight :intensity="2.5" />
 
+<TresDirectionalLight
+  :position="[5, 10, 5]"
+  :intensity="1.0"
+  cast-shadow
+  :shadow-mapSize-width="2048"
+  :shadow-mapSize-height="2048"
+  :shadow-bias="-0.0001"
+  :shadow-camera-left="-5"
+  :shadow-camera-right="5"
+  :shadow-camera-top="5"
+  :shadow-camera-bottom="-5"
+/>
+<TresGroup :position="[0, -1, 0]">
   <!-- モデル設定 -->
   <primitive
-   :object="model"
-   :position="[0, -1.5, 0]"
+    v-if="model"
+    :object="model"
+  />
+  <primitive
+    v-if="test_base_model"
+    :object="test_base_model"
   />
 
   <!-- 軸表示オブジェクト -->
-  <TresAxesHelper
-   :position="[0, -1.5, 0]"
-  />
+  <TresAxesHelper />
 
   <!-- グリッドオブジェクト -->
   <TresGridHelper
-   :args="[10, 10, 0x444444, 'teal']"
-   :position="[0, -1.5, 0]"
+    :args="[10, 10, 0x444444, 'teal']"
   />
+</TresGroup>
+
 </template>
 
