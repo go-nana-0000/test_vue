@@ -9,6 +9,7 @@ const currentAction = ref(0)
 const selectedAnimation = ref('')
 const selectedMorph = ref('')
 const morphValue = ref(0)
+const morphValues = ref<Record<string, number>>({}) // 各モーフの値を保存
 const availableActions = ref<string[]>([])
 const actionMap = ref<Record<string, number>>({})
 const morphNames = ref<string[]>([])
@@ -38,6 +39,16 @@ watchEffect(() => {
   }
 })
 
+// モーフ選択が変更されたら、スライダーをそのモーフの値に合わせる
+watch(selectedMorph, (newMorph) => {
+  if (newMorph && morphValues.value[newMorph] !== undefined) {
+    morphValue.value = morphValues.value[newMorph]
+  } else if (newMorph) {
+    morphValue.value = 0 // 新しいモーフの場合は0
+    morphValues.value[newMorph] = 0
+  }
+})
+
 // モーフの変更を監視してモデルに反映
 watch(
   [selectedMorph, morphValue, modelReady, () => modelRef.value],
@@ -50,6 +61,11 @@ watch(
       typeof model.setMorph !== 'function'
     ) {
       return
+    }
+
+    // 現在のモーフの値を保存
+    if (selectedMorph.value) {
+      morphValues.value[selectedMorph.value] = morphValue.value
     }
 
     requestAnimationFrame(() => {
