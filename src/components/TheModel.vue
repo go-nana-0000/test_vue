@@ -9,17 +9,15 @@ import { useCameraSettings } from '@/composables/useCameraSettings'
 import { useModelWithFeatures } from '@/composables/useModelWithFeatures'
 
 // expose する入れ物を先に作る
-const AnimRef = ref<Record<string, number> | null>(null)
+const AnimRef = ref<Record<string, number>>({})
 const playFnRef = ref<((n: number) => void) | null>(null)
 
-defineExpose({
-  get Anim() {
-    return AnimRef.value
-  },
-  play(action: number) {
-    if (playFnRef.value) playFnRef.value(action)
-  }
-})
+const emit = defineEmits<{
+  (e: 'model-ready', payload: {
+    actionMap: Record<string, number>
+    morphNames: string[]
+  }): void
+}>()
 
 // 描画前のエラー処理
 onUnmounted(() => {
@@ -32,7 +30,7 @@ const props = defineProps<{
 }>()
 
 // composable から取得
-const { model, play, Anim: AnimRaw } = await useModelWithFeatures('./shark_captain.glb', {
+const { model, play, Anim: AnimRaw, setMorph, getMorphList } = await useModelWithFeatures('./shark_captain.glb', {
   preset: 'character'
 })
 
@@ -40,8 +38,30 @@ const { model: test_base_model } = await useModelWithFeatures('./test_base.glb',
   preset: 'static'
 })
 
-AnimRef.value = AnimRaw ?? null
+AnimRef.value = AnimRaw ?? {}
 playFnRef.value = play ?? null
+
+const morphNames = getMorphList ? getMorphList().flatMap((item) => item.morphs) : []
+
+emit('model-ready', {
+  actionMap: AnimRef.value,
+  morphNames,
+})
+
+defineExpose({
+  play(action: number) {
+    if (playFnRef.value) playFnRef.value(action)
+  },
+  setMorph(name: string, value: number) {
+    if (setMorph) setMorph(name, value)
+  },
+  getMorphList() {
+    return getMorphList ? getMorphList() : []
+  },
+  get morphNames() {
+    return morphNames
+  }
+})
 
 watch(() => props.action, (newAction) => {
   if (playFnRef.value) playFnRef.value(newAction)

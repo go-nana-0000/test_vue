@@ -1,28 +1,41 @@
 <script setup lang="ts">
 import { TresCanvas } from '@tresjs/core'
-import { computed, ref, watchEffect } from 'vue'
+import { ref, watchEffect } from 'vue'
 import TheModel from './components/TheModel.vue'
 import * as THREE from 'three'
 
 const modelRef = ref<InstanceType<typeof TheModel> | null>(null)
 const currentAction = ref(0)
-const selectedAnimation = ref('Idle')
+const selectedAnimation = ref('')
+const selectedMorph = ref('')
+const morphValue = ref(0)
+const availableActions = ref<string[]>([])
+const actionMap = ref<Record<string, number>>({})
+const morphNames = ref<string[]>([])
 
-const availableActions = computed(() => {
-  const anim = modelRef.value?.Anim as Record<string, number> | undefined
-  return anim ? Object.keys(anim) : []
+function onModelReady(payload: { actionMap: Record<string, number>; morphNames: string[] }) {
+  actionMap.value = payload.actionMap
+  availableActions.value = Object.keys(payload.actionMap)
+  morphNames.value = [...new Set(payload.morphNames)]
+
+  if (!selectedAnimation.value && availableActions.value.length) {
+    selectedAnimation.value = availableActions.value[0]
+  }
+}
+
+watchEffect(() => {
+  if (selectedAnimation.value && selectedAnimation.value in actionMap.value) {
+    currentAction.value = actionMap.value[selectedAnimation.value]
+  }
 })
 
 watchEffect(() => {
-  const anim = modelRef.value?.Anim as Record<string, number> | undefined
-  if (!anim || !selectedAnimation.value) return
-
-  if (!(selectedAnimation.value in anim)) {
-    selectedAnimation.value = availableActions.value[0] ?? ''
-    return
+  if (morphNames.value.length && !selectedMorph.value) {
+    selectedMorph.value = morphNames.value[0]
   }
-
-  currentAction.value = anim[selectedAnimation.value]
+  if (selectedMorph.value && modelRef.value?.setMorph) {
+    modelRef.value.setMorph(selectedMorph.value, morphValue.value)
+  }
 })
 
 </script>
@@ -41,7 +54,7 @@ watchEffect(() => {
         style="width: 100%; height: 100vh;">
 
         <Suspense>
-          <TheModel ref="modelRef" :action="currentAction" />
+          <TheModel ref="modelRef" :action="currentAction" @model-ready="onModelReady" />
         </Suspense>
       </TresCanvas>
     </div>
@@ -54,6 +67,27 @@ watchEffect(() => {
             <option value="" disabled>{{ availableActions.length ? '選択してください' : '読み込み中...' }}</option>
             <option v-for="name in availableActions" :key="name" :value="name">{{ name }}</option>
           </select>
+        </div>
+        <div class="ui-controls">
+          <label for="morph-select">モーフ:
+          </label>
+          <select id="morph-select" v-model="selectedMorph" :disabled="morphNames.length === 0">
+            <option value="" disabled>{{ morphNames.length ? '選択してください' : 'モーフなし' }}</option>
+            <option v-for="name in morphNames" :key="name" :value="name">{{ name }}</option>
+          </select>
+        </div>
+        <div class="ui-controls">
+          <label for="morph-range">強さ: {{ morphValue.toFixed(2) }}
+          </label>
+          <input
+            id="morph-range"
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            v-model.number="morphValue"
+            :disabled="!selectedMorph"
+          />
         </div>
         <div id="howto">
           <h3>操作方法</h3>
