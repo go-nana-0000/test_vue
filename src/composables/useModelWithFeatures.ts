@@ -21,7 +21,7 @@ type Options = {
 const FEATURE_PRESETS = {
   character: {
     toon: true,
-    outline: true,
+    outline: false,
     animation: true,
     shadow: false,
     morph: true,
@@ -29,7 +29,7 @@ const FEATURE_PRESETS = {
   },
   static: {
     toon: true,
-    outline: true,
+    outline: false,
     animation: false,
     shadow: false,
     morph: false,
