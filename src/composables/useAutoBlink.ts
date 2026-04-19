@@ -31,7 +31,7 @@ export function useAutoBlink(
       blinkTime += delta * closeSpeed
 
       const value = Math.min(blinkTime, 1)
-      setMorph('Blink', value)
+      setMorph('Eye_Blink', value)
 
       if (value >= 1) {
         state = 'CLOSED'
@@ -43,7 +43,7 @@ export function useAutoBlink(
     if (state === 'CLOSED') {
       closedHoldTime += delta
 
-      setMorph('Blink', 1)
+      setMorph('Eye_Blink', 1)
 
       // ★ここで「閉じている時間」を調整
       if (closedHoldTime > 0.08 + Math.random() * 0.12) {
@@ -57,11 +57,11 @@ export function useAutoBlink(
       blinkTime += delta * openSpeed
 
       const value = Math.max(1 - blinkTime, 0)
-      setMorph('Blink', value)
+      setMorph('Eye_Blink', value)
 
       if (value <= 0) {
         state = 'OPEN'
-        setMorph('Blink', 0)
+        setMorph('Eye_Blink', 0)
       }
     }
   }
