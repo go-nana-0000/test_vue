@@ -9,12 +9,16 @@ import { useCameraSettings } from '@/composables/useCameraSettings'
 import { useModelWithFeatures } from '@/composables/useModelWithFeatures'
 
 // expose する入れ物を先に作る
-const Anim = ref<Record<string, number> | null>(null)
-const playFn = ref<((n: number) => void) | null>(null)
+const AnimRef = ref<Record<string, number> | null>(null)
+const playFnRef = ref<((n: number) => void) | null>(null)
 
 defineExpose({
-  Anim,
-  play: playFn
+  get Anim() {
+    return AnimRef.value
+  },
+  play(action: number) {
+    if (playFnRef.value) playFnRef.value(action)
+  }
 })
 
 // 描画前のエラー処理
@@ -36,11 +40,11 @@ const { model: test_base_model } = await useModelWithFeatures('./test_base.glb',
   preset: 'static'
 })
 
-Anim.value = AnimRaw
-playFn.value = play
+AnimRef.value = AnimRaw ?? null
+playFnRef.value = play ?? null
 
 watch(() => props.action, (newAction) => {
-  if (playFn.value) playFn.value(newAction)
+  if (playFnRef.value) playFnRef.value(newAction)
 })
 
 // カメラ設定読み込み
