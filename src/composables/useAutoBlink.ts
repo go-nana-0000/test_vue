@@ -5,6 +5,11 @@ export function useAutoBlink(
   scene: THREE.Object3D,
   setMorph: (name: string, value: number) => void
 ) {
+
+  const MORPH = {
+    BLINK: 'Eye_Blink'
+  } as const
+
   let timer = 0
 
   // 状態管理
@@ -31,7 +36,7 @@ export function useAutoBlink(
       blinkTime += delta * closeSpeed
 
       const value = Math.min(blinkTime, 1)
-      setMorph('Eye_Blink', value)
+      setMorph(MORPH.BLINK, value)
 
       if (value >= 1) {
         state = 'CLOSED'
@@ -43,7 +48,7 @@ export function useAutoBlink(
     if (state === 'CLOSED') {
       closedHoldTime += delta
 
-      setMorph('Eye_Blink', 1)
+      setMorph(MORPH.BLINK, 1)
 
       // ★ここで「閉じている時間」を調整
       if (closedHoldTime > 0.08 + Math.random() * 0.12) {
@@ -57,11 +62,11 @@ export function useAutoBlink(
       blinkTime += delta * openSpeed
 
       const value = Math.max(1 - blinkTime, 0)
-      setMorph('Eye_Blink', value)
+      setMorph(MORPH.BLINK, value)
 
       if (value <= 0) {
         state = 'OPEN'
-        setMorph('Eye_Blink', 0)
+        setMorph(MORPH.BLINK, 0)
       }
     }
   }
