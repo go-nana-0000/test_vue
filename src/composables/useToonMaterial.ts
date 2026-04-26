@@ -32,7 +32,9 @@ export function applyToonMaterial(model: THREE.Object3D) {
       }
 
       child.material = new THREE.MeshToonMaterial({
-        color: oldMat?.color?.clone() ?? new THREE.Color(0xffffff),
+        map: oldMat?.map ?? null,
+        transparent: oldMat?.transparent ?? false,
+        alphaTest: oldMat?.alphaTest ?? 0,
         gradientMap,
         side: THREE.DoubleSide,
       })
