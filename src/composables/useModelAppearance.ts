@@ -8,7 +8,7 @@ export function useModelAppearance(model: THREE.Object3D, config: {
   shadow: boolean
 }) {
   if (config.toon) applyToonMaterial(model)
-  if (config.outline) applyOutline(model)
+  // if (config.outline) applyOutline(model)
 
   model.traverse((child: any) => {
     if (child.isMesh) {
