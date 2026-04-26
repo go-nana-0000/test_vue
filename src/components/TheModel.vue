@@ -52,7 +52,7 @@ defineExpose({
   }
 })
 
-const shark = await useModelWithFeatures('./shark_captain.glb', {
+const shark = await useModelWithFeatures('./cannon_model.glb', {
   preset: 'character'
 })
 
