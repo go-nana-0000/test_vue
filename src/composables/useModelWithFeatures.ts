@@ -25,7 +25,7 @@ const FEATURE_PRESETS = {
     animation: true,
     shadow: false,
     morph: true,
-    initialAnimation: 'Idle',
+    initialAnimation: 'Anm_Idle',
   },
   static: {
     toon: true,
